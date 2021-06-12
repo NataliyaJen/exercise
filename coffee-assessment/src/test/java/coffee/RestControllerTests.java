@@ -10,45 +10,40 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import coffee.controller.CoffeeRestController;
-import coffee.service.CoffeeData;
 
-@RunWith(SpringRunner.class)
+@RunWith(SpringJUnit4ClassRunner.class)
 @WebMvcTest(CoffeeRestController.class)
 public class RestControllerTests {
 	
 	@Autowired
     private MockMvc mvc;
 	
-	@Autowired
-	ObjectMapper objectMapper;
  
-    @MockBean
-    private CoffeeData service;
+
 
 	@Test
 	public void test() throws Exception{
 		
 
-/*	    
+	    
 		mvc.perform(
 			get("/coffee/accounts/rochelle")
 			.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.*", hasSize(1)))
-			.andExpect(jsonPath("$[0].user", is("rochelle")))
+			.andExpect(jsonPath("$['rochelle']['user']", is("rochelle")))
+			.andExpect(jsonPath("$['rochelle']['credit']", is(95.0)))
+			.andExpect(jsonPath("$['rochelle']['debt']", is(52.25)))
 			;		
 	    
-*/	
-					
+	
+		
    
 	}
 
