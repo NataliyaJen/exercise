@@ -34,7 +34,7 @@ public class CoffeeRestController {
 						.filter(map -> map.getKey().toLowerCase().contains(query.toLowerCase()))	
 						.collect(Collectors.toMap(entry -> entry.getKey(),(entry -> entry.getValue())))
 						, HttpStatus.OK);
-		}catch(Exception e) {
+		}catch(Exception e) { 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}	
 	}
