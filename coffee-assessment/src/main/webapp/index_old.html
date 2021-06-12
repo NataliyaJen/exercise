@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>BANK ABC - CONTACTS</title>
+	<link rel="SHORTCUT ICON" href="images/application.ico">
+
+    <!-- Angular Material CSS -->
+    <link rel="stylesheet" href="css/angular-material.min.css">
+    
+
+
+</head>
+<body>
+
+	<div layout="column" layout-fill id="demo" ng-app="demoApp" ng-controller="demoCtrl as mc">
+    	<md-toolbar class="md-hue-1" >
+	   		<div class="md-toolbar-tools">
+	   			
+		        <h2 flex md-truncate>&nbsp;Customer contacts <font size="2">[Supported: Google Chrome, Firefox]</font></h2>
+
+		        <md-button class="md-raised " ng-click="newContact($event)">New Contact</md-button>
+		        <a target="_newTab" href="swagger-ui.html">
+	   				[swagger-ui]
+	   			</a>
+	   			&nbsp;&nbsp;
+		        <a target="_newTab" href="/h2">
+	   				[h2 datastore]
+	   			</a>	   			
+	    	</div>
+		</md-toolbar>	
+
+		<md-content class="md-padding">
+
+		    <div layout-gt-sm="row" >
+		    	<md-input-container style="min-width:200px;">
+	         		<label>Advanced search</label>
+		        <md-select ng-model="view.searchType" ng-change="loadData()">
+	           		<md-option value="0"><em>None</em></md-option>
+	           		<md-option value="1">Free search</md-option>
+	           		<md-option value="2">By age range</md-option>
+		          	</md-select>
+	          	</md-input-container>	
+	          		
+
+				<md-input-container class="md-block" flex-gt-sm ng-show="view.searchType==1">
+					<label>Free search</label>
+					<input ng-model="view.search.freeSearch" >
+				</md-input-container>
+			    <md-button class="md-primary md-raised demo-dialog-open-button" ng-click="loadData()" ng-show="view.searchType==1">
+			      Apply
+			    </md-button>
+			    
+				<md-input-container class="md-block" flex-gt-sm ng-show="view.searchType==2">
+					<label>Start age range</label>
+					<input type="number" ng-model="view.search.startRange" ng-pattern="/^[0-9]{1,7}$/">
+				</md-input-container>
+				<md-input-container class="md-block" flex-gt-sm ng-show="view.searchType==2">
+					<label>Finish age range</label>
+					<input type="number" ng-model="view.search.finishRange" ng-pattern="/^[0-9]{1,7}$/" >
+				</md-input-container>			
+			    <md-button class="md-primary md-raised demo-dialog-open-button" ng-click="loadData()" ng-show="view.searchType==2">
+			      Apply
+			    </md-button>
+			    
+			</div>
+			
+		
+			<div flex-xs  layout="column">
+			
+				<md-card md-theme="default" md-theme-watch ng-repeat="contact in view.contacts">
+				
+					<md-card-title>
+			          <md-card-title-text>
+			            <span class="md-headline">{{contact.firstName}} {{contact.secondName}}</span>
+			            <span class="md-subhead"><b>Date of birth:</b> {{contact.dateOfBirth | dateAsString}}</span>
+			            <span class="md-subhead"><b>Addresses:</b> {{contact.addresses}}</span>
+			            <span class="md-subhead"><b>Phone Numbers:</b> {{contact.phoneNumbers}}</span>
+			          </md-card-title-text>
+			          <md-card-title-media>
+			            <div class="md-media-lg card-media">
+			            	<img ng-src="data:image/png;base64,{{contact.personalPhoto}}" class="md-card-image" alt="photo"
+			            	onError="this.src='images/placeholder.gif';"
+			            	>
+			            </div>
+			          </md-card-title-media>
+			        </md-card-title>
+			        <md-card-actions layout="row" layout-align="end center">
+			        	<md-button class="md-raised md-primary" ng-click="editContact($event, contact.id)">Edit</md-button>
+				        <md-button class="md-raised md-warn" ng-click="actionRemoveContact($event,contact.id)">Remove</md-button>
+			        </md-card-actions>
+		      </md-card>
+		  </div>    	
+      </md-content>	
+      
+      <div style="visibility: hidden" >
+		<div class="md-dialog-container" id="panelContact">
+			<md-dialog aria-label="Edit Consumption">
+				<form ng-cloak role="form" enctype="multipart/form-data">
+					    <md-toolbar>
+					      <div class="md-toolbar-tools">
+					        <h2>Contact</h2>
+					        <span flex></span>
+					        <md-button class="md-icon-button" ng-click="closeContact($event)">
+					          <md-icon md-svg-src="images/svg/ic_close_white_24px.svg" aria-label="Close dialog"></md-icon>
+					        </md-button>
+					      </div>
+					    </md-toolbar>
+					
+					    <md-dialog-content>
+					      	<div class="md-dialog-content" >
+						        <div layout-gt-sm="row">
+						          <md-input-container class="md-block" flex-gt-sm>
+						            <label>First name</label>
+						            <input ng-model="view.contact.firstName" required>
+						          </md-input-container>
+						
+						          <md-input-container class="md-block" flex-gt-sm>
+						            <label>Second Name</label>
+						            <input ng-model="view.contact.secondName" required>
+						          </md-input-container>
+						        </div>	
+						        <md-input-container class="md-block">
+          							<label>Addresses</label>
+          							<input ng-model="view.contact.addresses" required>
+        						</md-input-container>	
+        						<div layout-gt-sm="row">
+	        						<md-input-container class="md-block">
+	          							<label>Phone Numbers</label>
+	          							<input ng-model="view.contact.phoneNumbers" required>
+	        						</md-input-container>
+	        						<md-input-container class="md-block">
+	          							<label>Date Of Birth</label>
+	          							<md-datepicker ng-model="view.contact.datePicker" required></md-datepicker>
+	        						</md-input-container>
+        						</div>
+  
+        						 
+								<div layout-gt-sm="row">
+        							<input id="contact_file" type="file" accept="image/*" onchange="loadFile(event)">
+							      	<md-button class="md-primary" ng-click="clearContactImg($event)" >
+							       		Clear Image
+							     	</md-button>        							
+        						</div>	
+        						<div class="md-media-lg card-media">
+									<img id="contact_img" style="object-fit: cover; max-height: 150px; max-width: 150px'; "/> 
+								</div>	 
+  									      				
+					      
+					      	</div>
+					    </md-dialog-content>
+					
+					    <md-dialog-actions layout="row">
+	
+					      <span flex></span>
+						      <md-button class="md-raised md-warn" ng-click="actionRemoveContact($event,view.contact.id)" ng-if="view.contact.edit==true">
+						       Remove
+						      </md-button>
+						      <md-button class="md-raised md-primary" ng-click="actionUpdateContact($event)" ng-if="view.contact.edit==true" ng-disabled="validateContact()">
+						       Update
+						      </md-button>
+						      <md-button class="md-raised md-primary" ng-click="actionInsertContact($event)" ng-if="view.contact.edit!==true" ng-disabled="validateContact()">
+						       Insert
+						      </md-button>				      
+				      
+					    </md-dialog-actions>
+				</form>
+			</md-dialog>
+		</div>      
+      </div>
+      
+    </div>
+    
+
+      
+
+
+	<!--  Angular 1.5 JavaScript -->
+	<script src='js/angular.min.js'></script>
+	<script src='js/angular-animate.min.js'></script>
+	<script src='js/angular-aria.min.js'></script>
+  	<script src="js/angular-material.min.js"></script>
+
+<script>
+
+	var loadFile = function(event) {
+		var reader = new FileReader();
+	    reader.onload = function(){
+	      	var output = document.getElementById('contact_img');
+	      	output.src = reader.result;
+	    };
+	    reader.readAsDataURL(event.target.files[0]);
+	};
+	  
+	function isInt(n) {
+		    return !isNaN(parseInt(n)) && isFinite(n);
+	}
+	
+	function getScope(){
+		return angular.element(document.getElementById("demo")).scope();
+	}
+
+	var app = angular.module('demoApp', ['ngMaterial']);
+	
+	app.filter('dateAsString', function($filter)
+			{
+			    return function(input)
+			    {
+			    	if(input == null){ 
+			    		return ""; 
+			    	}
+			        var _date = $filter('date')(new Date(input), 'dd/MM/yyyy');
+			        return _date.toUpperCase();
+			    };
+			});
+	
+	app.controller('demoCtrl', function($scope, $http, $browser, $timeout, $mdDialog, $filter) {
+			$scope.view = {
+					hash: 0,
+					inizialised : false,
+					searchType: 0,
+					search: {
+						freeSearch: '',
+						startRange: 0,
+						finishRange: 0
+					},
+					
+					contacts : [],
+					contact: {
+					    id: null,
+					    firstName: null,
+					    secondName: null,
+					    addresses: null,
+					    dateOfBirth: null,
+					    datePicker : null,
+					    phoneNumbers: null,
+					    personalPhoto: null,
+					    edit: false
+					  }
+			};
+			
+			
+			
+			$scope.loadData = function() {
+				var url='';
+				if(getScope().view.searchType==0){
+					url='/abc/contacts';
+				}else if(getScope().view.searchType==1){
+					if(getScope().view.search.freeSearch==null || getScope().view.search.freeSearch=='')
+						url='/abc/freeSearch/*';
+					else
+						url='/abc/freeSearch/'+escape(getScope().view.search.freeSearch);
+				}else if(getScope().view.searchType==2){
+					if(getScope().view.search.startRange==null || !isInt(getScope().view.search.startRange))
+						getScope().view.search.startRange=0;
+					if(getScope().view.search.finishRange==null || !isInt(getScope().view.search.finishRange))
+						getScope().view.search.finishRange=0;					
+					url='/abc/searchByAge/'+getScope().view.search.startRange+'/'+getScope().view.search.finishRange;
+				}
+		    	if(url!=''){
+		    		getScope().view.inizialised = false;
+			    	$http.get(url).
+				    success(function(data, status, headers, config) {
+				    	getScope().view.hash = new Date().getTime();
+				    	getScope().view.inizialised = true;
+				    	getScope().view.contacts = data;
+				    	
+					}).
+					error(function(data, status, headers, config) {
+						console.log(data);
+					});
+		    	}
+			}
+			
+			getScope().loadData();
+			
+			$scope.newContact = function(ev) {
+				getScope().view.contact.edit=false;
+				$mdDialog.show({
+				      contentElement: '#panelContact',
+				      parent: angular.element(document.body),
+				      ariaLabel: 'Contact',
+				      targetEvent: ev,
+				      clickOutsideToClose: true
+				    });
+			}
+			
+			$scope.editContact = function(ev,id) {
+				$http.get('/abc/contacts/'+id).
+			    success(function(data, status, headers, config) {
+			    	getScope().view.contact.edit=true;		
+			    	getScope().view.contact.id=data.id;
+			    	getScope().view.contact.firstName=data.firstName;
+			    	getScope().view.contact.secondName=data.secondName;
+			    	getScope().view.contact.addresses=data.addresses;
+			    	getScope().view.contact.phoneNumbers=data.phoneNumbers;
+			    	getScope().view.contact.dateOfBirth=data.dateOfBirth;
+			    	getScope().view.contact.personalPhoto=data.personalPhoto;
+			    	if(data.dateOfBirth!=null){
+			    		getScope().view.contact.datePicker = new Date(data.dateOfBirth);
+			    	}
+			    	getScope().view.contact.phoneNumbers=data.phoneNumbers;
+			    	if(data.personalPhoto!=null){
+			    		document.getElementById("contact_img").src = 'data:image/png;base64,'+data.personalPhoto;
+			    	}
+  	
+					$mdDialog.show({
+					      contentElement: '#panelContact',
+					      parent: angular.element(document.body),
+					      ariaLabel: 'Contact',
+					      targetEvent: ev,
+					      clickOutsideToClose: true
+					    });
+			    }).
+				error(function(data, status, headers, config) {
+					console.log(data);
+				});
+				
+			}			
+			
+			$scope.clearContactImg = function(ev) {
+		    	document.getElementById("contact_file").value = '';
+		    	document.getElementById("contact_img").src = '';
+		    	
+			}
+			$scope.clearContact = function(ev) {
+				getScope().clearContactImg();
+		    	getScope().view.contact = {
+				    id: null,
+				    firstName: null,
+				    secondName: null,
+				    addresses: null,
+				    dateOfBirth: null,
+				    datePicker : null,
+				    phoneNumbers: null,
+				    personalPhoto: null,
+				    edit: false
+				  };
+			}
+			$scope.closeContact = function(ev) {
+				getScope().clearContact();
+				$mdDialog.cancel();
+			}
+			
+			$scope.validateContact = function() {
+				var scope_ = getScope();
+				if(
+					(scope_.view.contact.firstName==null || scope_.view.contact.firstName=='') ||
+					(scope_.view.contact.secondName==null || scope_.view.contact.secondName=='') ||
+					(scope_.view.contact.addresses==null || scope_.view.contact.addresses=='') ||
+					(scope_.view.contact.phoneNumbers==null || scope_.view.contact.phoneNumbers=='') ||
+					(scope_.view.contact.datePicker==null)
+				)
+					return true;
+				else
+					return false;
+			}
+
+			
+			$scope.actionRemoveContact = function(ev, id) {
+				$http({
+					url: '/abc/contacts/'+id,
+					method: 'DELETE'
+				}).
+			    success(function(data, status, headers, config) {
+			    	getScope().closeContact();
+			    	getScope().loadData();
+			    }).
+				error(function(data, status, headers, config) {
+					console.log(data);
+				});
+			}
+			
+			$scope.actionInsertContact = function(ev) {
+				var fd = new FormData();
+				if($scope.view.contact.datePicker!=null)
+					$scope.view.contact.dateOfBirth = $filter('date')($scope.view.contact.datePicker, 'yyyy-MM-dd');
+				fd.append("contact", new Blob([JSON.stringify($scope.view.contact)], {
+	                type: "application/json"
+	            }));
+				fd.append("file",document.getElementById('contact_file').files[0]);
+				
+				$http({
+					url: '/abc/contacts',
+					method: 'POST',
+					headers: {'Content-Type': undefined},
+					data: fd						
+				}).
+			    success(function(data, status, headers, config) {
+			    	getScope().closeContact();
+			    	getScope().loadData();
+			    }).
+				error(function(data, status, headers, config) {
+					console.log(data);
+				});				
+			}	
+			
+			$scope.actionUpdateContact = function(ev) {
+				var fd = new FormData();
+				if($scope.view.contact.datePicker!=null)
+					$scope.view.contact.dateOfBirth = $filter('date')($scope.view.contact.datePicker, 'yyyy-MM-dd');
+				fd.append("contact", new Blob([JSON.stringify($scope.view.contact)], {
+	                type: "application/json"
+	            }));
+				fd.append("file",document.getElementById('contact_file').files[0]);
+				
+				$http({
+					url: '/abc/contacts/'+$scope.view.contact.id,
+					method: 'PUT',
+					headers: {'Content-Type': undefined},
+					data: fd						
+				}).
+			    success(function(data, status, headers, config) {
+			    	getScope().closeContact();
+			    	getScope().loadData();
+			    }).
+				error(function(data, status, headers, config) {
+					console.log(data);
+				});
+				
+			}				
+
+		}
+	);
+</script>	
+
+</body>
+</html>
