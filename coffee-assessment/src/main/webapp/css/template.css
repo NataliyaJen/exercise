@@ -1,0 +1,25 @@
+.styleTable
+{	
+    font-family : Calibri, 'Trebuchet MS', Verdana, Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-variant: small-caps;
+    
+}
+
+.tableProp{
+	border: 1px solid #ddd; 
+	width:100%;
+}
+
+.whiteBckg{	
+	background-color: white !important;
+}
+
+span.screeningrules {
+	min-width: calc(100% - 10px);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 1px;
+    display: inline-block;
+}

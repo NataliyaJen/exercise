@@ -9,7 +9,6 @@
 
 <script src="//polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver" crossorigin="anonymous"></script>
 
-<!-- Load Vue followed by BootstrapVue -->
 <script src="//unpkg.com/vue@latest/dist/vue.min.js"></script>
 <script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
 
@@ -19,11 +18,87 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Coffee Assessment</title>
+<link rel="stylesheet" href="css/template.css" type="text/css" />
 <link rel="SHORTCUT ICON" href="images/liste.ico">
+<title>Coffee Assessment</title>
+
 </head>
 <body>
-<form name="usersList"></form>
+<form id="usersList">
+ 	<div style="width:100%;" class="styleTable" align="center">
+		<table style="width:60%;">
+			<tr align="right">
+				<td>
+					<a target="_newTab" href="swagger-ui.html">
+		   				[swagger-ui]
+		   			</a>
+		   		</td>
+			</tr>	
+			<tr>
+				<td align="center"><p class="h5 mb-2"><b-icon icon="card-checklist"></b-icon>  Coffee Assessment</p></td>
+			</tr>
+			<tr>
+				<td>
+				<b-button-toolbar>
+					<b-input-group size="sm">
+						<b-form-input v-model="searchText" placeholder="Enter name"></b-form-input>
+					</b-input-group>
+					<b-button variant="outline-secondary" v-on:click="getListUsers()">
+				    	<b-icon icon="search"></b-icon>
+					    <span> Search</span>		    	
+			    	</b-button>
+			    </b-button-toolbar>
+				</td>
+			</tr>	
+			<tr>
+				<td align="center" style="width:100%;">							
+					    <b-table :items="view.resList" :fields="fields" responsive="sm" align="center" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" ref="bTable">
+					    	<template v-slot:cell(show_details)="row">					     
+						       <b-button size="sm" @click="row.toggleDetails" class="mr-2" variant="outline-secondary">
+						          {{ row.detailsShowing ? 'Close' : 'Details'}}
+						       </b-button>							  				   		
+					      	</template>
+					      	<template v-slot:row-details="row">
+					      		<table class="tableProp" >
+							      	<tr>
+							      		<td class="whiteBckg">
+									      	<b-tabs content-class="mt-3">
+											    <b-tab :title="'Credit: '+row.item.credit" active title-link-class="text-secondary" >							    	
+											    	<b-list-group-item button v-for="payment in row.item.payments">
+													  <div>
+												  		<table style="width:90%;">
+													  		<tr>
+													  			<td width="100%" align="center">{{payment.amount}}</td>
+													  		</tr>
+												  		</table>		  
+													  </div>		  			
+													 </b-list-group-item>
+											    </b-tab>
+											    <b-tab :title="'Debt: '+row.item.debt" title-link-class="text-secondary" >
+											    	<b-list-group-item button v-for="order in row.item.orders">
+														<div>
+													  		<table style="width:90%;">
+														  		<tr>
+														  			<td width="33%" align="center"><span class="screeningrules">{{order.drink}}</span></td>
+														  			<td width="33%" align="center">{{order.size}}</td>
+														  			<td width="34%" align="center">{{order.amount}}</td>
+														  		</tr>
+													  		</table>		  
+														  </div>		  			
+													</b-list-group-item>
+											    </b-tab>
+											    
+											</b-tabs>					     
+							      		</td>
+							      	</tr>
+							    </table>
+					      </template>
+				   	</b-table>
+		 	 	</td>
+		 	 </tr>		 	 
+		</table>
+	</div>
+</form>
 </body>
 <script>
 Vue.prototype.$http = axios;
@@ -34,20 +109,38 @@ var usersListModel = {
 
 
 var usersList = new Vue({
-  el: '#usersListt',
+  el: '#usersList',
   data: {
-	view:usersListModel
+	view:usersListModel,
+	fields: [{ key: 'user', label: 'User'},
+	  	   { key: 'unpaid', label: 'Unpaid'},	  	  
+	  	   { key: 'show_details', label: ''}
+	  	   ],
+	sortBy:'user',
+	sortDesc: true,
+	searchText:''
   },
   methods:{
 	  getListUsers: function(){
 			var self = this;
 			var hrefLocation = window.location.href;
 	  		var path = hrefLocation.substr(0, hrefLocation.lastIndexOf("/") + 1);
+	  		var search = self.searchText;
+	  		if(search=='')search = '*'
 	  		self.$http
-		  		.get(path + '/coffee/accounts/*')
+		  		.get(path + '/coffee/accounts/'+search)
 		  		.then(function(response) {
-		  			var data = response.data;			  			
-		  			self.view.resList = data.result;
+		  			var data = response.data;
+		  			self.view.resList = response.data;
+		  			for(i=0;i<data.length;i++){
+		  				var unpaid = data[i].debt-data[i].credit;
+		  				self.view.resList[i].unpaid=unpaid;
+		  				if(unpaid>0){
+		  					self.view.resList[i]._rowVariant='danger';
+		  				}else{
+		  					self.view.resList[i]._rowVariant='success';
+		  				}
+		  			}
 		  			  	
 	  			},
 		  		function (response) {
@@ -55,7 +148,12 @@ var usersList = new Vue({
 		  		      alert('error getListUsers method');
 		  		    }
 		  		);
-	  }
+	  },
+		  
+	  rowClass: function(item, type){
+	        if (!item) return
+	        if (item.unpaid>0){ return item._rowVariant='danger'}else{return 'success'}
+	    },//end rowClass metod
   },
   mounted: function () {
 	this.getListUsers();

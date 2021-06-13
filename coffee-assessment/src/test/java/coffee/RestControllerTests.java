@@ -37,9 +37,9 @@ public class RestControllerTests {
 			.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.*", hasSize(1)))
-			.andExpect(jsonPath("$['rochelle']['user']", is("rochelle")))
-			.andExpect(jsonPath("$['rochelle']['credit']", is(95.0)))
-			.andExpect(jsonPath("$['rochelle']['debt']", is(52.25)))
+			.andExpect(jsonPath("$[0]['user']", is("rochelle")))
+			.andExpect(jsonPath("$[0]['credit']", is(95.0)))
+			.andExpect(jsonPath("$[0]['debt']", is(52.25)))
 			;		
 	    
 	
