@@ -1,7 +1,7 @@
 package coffee.pojo;
 
 public class Order {
-
+	private static final long serialVersionUID = 1L;
 	private String user;
 	private String drink;
 	private String size;

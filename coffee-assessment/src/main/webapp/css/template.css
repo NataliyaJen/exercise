@@ -23,3 +23,8 @@ span.screeningrules {
     max-width: 1px;
     display: inline-block;
 }
+
+.normal{
+	font-weight: normal !important;
+}
+
